@@ -1,30 +1,39 @@
 const express = require('express')
 const http = require('http')
-const socketIo = require('socket.io')
+const { Server } = require('socket.io')
 const cors = require('cors')
 
 const app = express()
 const server = http.createServer(app)
-const io = socketIo(server)
-
-app.use(
-  cors({
+const io = new Server(server, {
+  cors: {
     origin: 'http://localhost:5173',
-  })
-)
+    methods: ['POST', 'GET'],
+  },
+})
+
+app.use(cors())
+
+app.get('/', (req, res) => {
+  console.log('app is running ')
+})
 
 io.on('connection', (socket) => {
-  console.log('A user has connected')
+  socket.emit('me', socket.id)
+
   socket.on('disconnect', () => {
-    console.log('A user has disconnected')
+    socket.broadcast.emit('callended')
   })
 
-  socket.on('chat message', (msg) => {
-    console.log('Message' + msg)
-    io.emit('chat message', msg)
+  socket.on('calluser', ({ userId, signal, from, name }) => {
+    io.to(userId).emit('callUser', { signal, from, name })
+  })
+
+  socket.on('answercall', (data) => {
+    io.to(data.to).emit('callaccepted', data.signal)
   })
 })
 
 server.listen(3000, () => {
-  console.log('Server listening on port 3000')
+  console.log('Server running on port 5000')
 })

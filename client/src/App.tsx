@@ -1,41 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import io from 'socket.io-client'
+import React, { useState, useEffect, useRef } from 'react'
+import { useSocket } from './context/SocketProvider'
 
-const socket = io('http://localhost:3000', { transports: ['websocket'] })
+const App = () => {
+  const { socket, userId } = useSocket()
 
-function App() {
-  const [messages, setMessages] = useState<string[]>([])
-  const [inputValue, setInputValue] = useState('')
-
-  useEffect(() => {
-    socket.on('chat message', (msg: string) => {
-      setMessages((prevMessages) => [...prevMessages, msg])
-    })
-  }, [])
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    socket.emit('chat message', inputValue)
-    setInputValue('')
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
-  }
-
-  return (
-    <div>
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>{message}</li>
-        ))}
-      </ul>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={inputValue} onChange={handleInputChange} />
-        <button type="submit">Send</button>
-      </form>
-    </div>
-  )
+  return <div>{userId}</div>
 }
 
 export default App
