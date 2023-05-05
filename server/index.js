@@ -22,18 +22,21 @@ io.on('connection', (socket) => {
   socket.emit('me', socket.id)
 
   socket.on('disconnect', () => {
-    socket.broadcast.emit('callended')
+    socket.broadcast.emit('callEnded')
+  })
+  socket.on('end', () => {
+    socket.broadcast.emit('callEnded')
   })
 
-  socket.on('calluser', ({ userId, signal, from, name }) => {
-    io.to(userId).emit('callUser', { signal, from, name })
+  socket.on('callUser', ({ userToCall, signal, from, name }) => {
+    io.to(userToCall).emit('callUser', { signal, from, name })
   })
 
-  socket.on('answercall', (data) => {
-    io.to(data.to).emit('callaccepted', data.signal)
+  socket.on('answerCall', (data) => {
+    io.to(data.to).emit('callAccepted', data.signal)
   })
 })
 
 server.listen(3000, () => {
-  console.log('Server running on port 5000')
+  console.log('Server running on port 3000')
 })
