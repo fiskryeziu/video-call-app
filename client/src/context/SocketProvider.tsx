@@ -30,6 +30,7 @@ type SocketContextValue = {
   stream?: MediaStream | null
   setStream?: (value: MediaStream | null) => void
   call?: any
+  cameraOn?: boolean
 }
 
 // Create a new context for the socket
@@ -55,55 +56,32 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const connectionRef = useRef<Peer.Instance | null>(null)
 
   useEffect(() => {
-    socket.on('connection', () => {
-      console.log('Connected to server')
-    })
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((currentStream) => {
+        setStream(currentStream)
 
-    socket.on('me', (id: string) => {
-      console.log(id)
-      setUserId(id)
-    })
+        if (myVideo.current) {
+          myVideo.current.srcObject = currentStream
+        }
+      })
+
+    socket.on('me', (id) => setUserId(id))
 
     socket.on('callUser', ({ from, name: callerName, signal }) => {
       setCall({ isReceivingCall: true, from, name: callerName, signal })
     })
-
-    return () => {
-      console.log('Disconnecting socket')
-      socket.emit('ends')
-    }
   }, [])
 
-  useEffect(() => {
-    if (cameraOn) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          setStream(stream)
-          if (myVideo.current) {
-            myVideo.current.srcObject = stream
-          }
-        })
-        .catch((error) => {
-          console.error('Error getting user media:', error)
-        })
-    } else {
-      if (stream) {
-        stream.getTracks().forEach((track) => {
-          track.stop()
-        })
-      }
-      setStream(null)
-    }
-  }, [cameraOn])
-
   const toggleCamera = () => {
-    if (cameraOn) {
-      // turn off camera
-      setCameraOn(false)
-    } else {
-      // turn on camera
-      setCameraOn(true)
+    if (stream) {
+      const tracks = stream.getTracks()
+      const videoTrack = tracks.find((track) => track.kind === 'video')
+      if (videoTrack) {
+        // toggle camera
+        videoTrack.enabled = !videoTrack.enabled
+        setCameraOn(videoTrack.enabled)
+      }
     }
   }
 
@@ -132,7 +110,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const callUser = (id: string) => {
     if (stream) {
       const peer = new Peer({ initiator: true, trickle: false, stream })
-
       peer.on('signal', (data) => {
         socket.emit('callUser', {
           userToCall: id,
@@ -155,7 +132,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       })
 
       connectionRef.current = peer
-      console.log(connectionRef.current)
     }
   }
 
@@ -174,6 +150,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         stream,
         callAccepted,
         call,
+        cameraOn,
       }}
     >
       {children}

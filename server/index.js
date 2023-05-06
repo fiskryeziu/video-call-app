@@ -24,6 +24,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     socket.broadcast.emit('callEnded')
   })
+
   socket.on('end', () => {
     socket.broadcast.emit('callEnded')
   })
