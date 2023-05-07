@@ -12,7 +12,6 @@ const Room = () => {
     answerCall,
     call,
   } = useContext(SocketContext)
-  console.log(call)
   return (
     <div>
       <p>{userId}</p>

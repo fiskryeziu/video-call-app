@@ -4,9 +4,15 @@ import { v4 } from 'uuid'
 import { SocketContext } from './context/SocketProvider'
 
 const Home = () => {
+  const { setId, setIsLoggedIn } = useContext(SocketContext)
   const navigate = useNavigate()
   const loginHandler = () => {
-    navigate(`/room/${v4()}`)
+    const id = v4()
+    setId(id)
+    setIsLoggedIn('true')
+    localStorage.setItem('loggedIn', 'true')
+
+    navigate(`/room/${id}`)
   }
   return (
     <div>
