@@ -34,6 +34,7 @@ type SocketContextValue = {
   cameraOn?: boolean
   setId: (value: string) => void
   setIsLoggedIn: (value: string) => void
+  callEnd?: boolean
 }
 
 // Create a new context for the socket
@@ -41,10 +42,9 @@ export const SocketContext = createContext<SocketContextValue>({
   socket: null,
   myVideo: {} as React.RefObject<HTMLVideoElement>,
   userVideo: {} as React.RefObject<HTMLVideoElement>,
-  callUser: (value: string) => console.log('callUser not implemented'),
-  setId: (value: string) => console.log('setId not implemented'),
-  setIsLoggedIn: (value: string) =>
-    console.log('setIsLoggedIn not implemented'),
+  callUser: () => console.log('callUser not implemented'),
+  setId: () => console.log('setId not implemented'),
+  setIsLoggedIn: () => console.log('setIsLoggedIn not implemented'),
 })
 
 // Create a SocketProvider component
@@ -57,9 +57,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [call, setCall] = useState<any>({})
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [cameraOn, setCameraOn] = useState(true)
-  const [name, setName] = useState<string>('fisi')
+  const [name, setName] = useState<string>('')
   const [callAccepted, setCallAccepted] = useState<boolean>(false)
   const [id, setId] = useState<string | null>(locationId)
+  const [callEnd, setCallEnd] = useState(false)
 
   const loginVal = localStorage.getItem('loggedIn')
   const isLogged =
@@ -95,22 +96,31 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         setIsLoggedIn('false')
         localStorage.setItem('loggedIn', 'false')
       }
-
-      socket.on('me', (id) => setUserId(id))
-
-      socket.on('callUser', ({ from, name: callerName, signal }) => {
-        setCall({ isReceivingCall: true, from, name: callerName, signal })
-      })
     } else {
       navigate('/')
     }
+    socket.on('me', (id) => {
+      localStorage.setItem('socketId', id)
+      setUserId(id)
+    })
+
+    socket.on('callUser', ({ from, name: callerName, signal }) => {
+      setCall({ isReceivingCall: true, from, name: callerName, signal })
+    })
     return () => {
+      localStorage.removeItem('socketId')
       if (currentStream) {
         currentStream.getTracks().forEach((track) => track.stop())
       }
     }
   }, [isLoggedIn, location.pathname, locationId, id, navigate])
 
+  useEffect(() => {
+    window.addEventListener('beforeunload', () => {
+      setCallEnd(true)
+      console.log('hello world')
+    })
+  }, [callEnd])
   const toggleCamera = () => {
     if (stream) {
       const tracks = stream.getTracks()
@@ -207,6 +217,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         cameraOn,
         setId,
         setIsLoggedIn,
+        callEnd,
       }}
     >
       {children}
