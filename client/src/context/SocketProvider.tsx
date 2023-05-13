@@ -35,6 +35,7 @@ type SocketContextValue = {
   setId: (value: string) => void
   setIsLoggedIn: (value: string) => void
   callEnd?: boolean
+  leaveCall?: () => void
 }
 
 // Create a new context for the socket
@@ -99,6 +100,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     } else {
       navigate('/')
     }
+
     socket.on('me', (id) => {
       localStorage.setItem('socketId', id)
       setUserId(id)
@@ -107,6 +109,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socket.on('callUser', ({ from, name: callerName, signal }) => {
       setCall({ isReceivingCall: true, from, name: callerName, signal })
     })
+
     return () => {
       localStorage.removeItem('socketId')
       if (currentStream) {
@@ -116,11 +119,15 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   }, [isLoggedIn, location.pathname, locationId, id, navigate])
 
   useEffect(() => {
-    window.addEventListener('beforeunload', () => {
+    if (userVideo.current?.srcObject && userVideo.current.srcObject === null) {
       setCallEnd(true)
-      console.log('hello world')
-    })
-  }, [callEnd])
+      setCallAccepted(false)
+      setCall({})
+      console.log('hello')
+    }
+    // console.log(userVideo.current)
+  }, [])
+
   const toggleCamera = () => {
     if (stream) {
       const tracks = stream.getTracks()
@@ -183,15 +190,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     }
   }
 
-  const leaveCall = () => {
-    //call ended state ↓
-    // state
-
+  function leaveCall() {
+    setCallEnd(true)
     if (connectionRef.current) {
       connectionRef.current.destroy()
     }
-
-    window.location.reload()
+    setCall({})
+    setCallAccepted(false)
   }
 
   window.addEventListener('popstate', () => {
@@ -218,6 +223,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         setId,
         setIsLoggedIn,
         callEnd,
+        leaveCall,
       }}
     >
       {children}

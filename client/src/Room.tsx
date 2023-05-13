@@ -14,6 +14,7 @@ const Room = () => {
     call,
     setName,
     callEnd,
+    leaveCall,
   } = useContext(SocketContext)
 
   const copyToClipboard = () => {
@@ -39,6 +40,7 @@ const Room = () => {
       <video ref={myVideo} autoPlay muted />
 
       <button onClick={toggleCamera}>toggle camera</button>
+      <button onClick={leaveCall}>leave call</button>
       {callAccepted && !callEnd && (
         <div style={{ width: '300px', height: '300px' }}>
           <video ref={userVideo} autoPlay muted />
