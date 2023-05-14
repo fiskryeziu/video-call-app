@@ -119,13 +119,16 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   }, [isLoggedIn, location.pathname, locationId, id, navigate])
 
   useEffect(() => {
-    if (userVideo.current?.srcObject && userVideo.current.srcObject === null) {
+    socket.on('callEnded', () => {
+      console.log('callEnded')
       setCallEnd(true)
-      setCallAccepted(false)
+      if (connectionRef.current) {
+        connectionRef.current.destroy()
+      }
       setCall({})
-      console.log('hello')
-    }
-    // console.log(userVideo.current)
+      setCallAccepted(false)
+      window.location.reload()
+    })
   }, [])
 
   const toggleCamera = () => {
@@ -197,6 +200,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     }
     setCall({})
     setCallAccepted(false)
+    window.location.reload()
   }
 
   window.addEventListener('popstate', () => {
