@@ -116,21 +116,23 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         currentStream.getTracks().forEach((track) => track.stop())
       }
     }
-  }, [isLoggedIn, location.pathname, locationId, id, navigate])
+  }, [isLoggedIn, location.pathname, locationId, id, navigate, call])
 
   useEffect(() => {
-    socket.on('callEnded', () => {
-      console.log('callEnded')
-      setCallEnd(true)
-      if (connectionRef.current) {
-        connectionRef.current.destroy()
-      }
-      setCall({})
-      setCallAccepted(false)
-      window.location.reload()
-    })
-  }, [])
-
+    if (callAccepted) {
+      socket.on('callEnded', () => {
+        console.log('callEnded')
+        setCallEnd(true)
+        setCall({})
+        setStream(null)
+        setCallAccepted(false)
+        setCallEnd(false)
+        if (connectionRef.current || Object.keys(call).length === 0) {
+          connectionRef.current?.destroy()
+        }
+      })
+    }
+  }, [callAccepted, call])
   const toggleCamera = () => {
     if (stream) {
       const tracks = stream.getTracks()
@@ -195,11 +197,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
   function leaveCall() {
     setCallEnd(true)
-    if (connectionRef.current) {
-      connectionRef.current.destroy()
-    }
     setCall({})
+    setStream(null)
     setCallAccepted(false)
+    setCallEnd(false)
+    if (connectionRef.current || Object.keys(call).length === 0) {
+      connectionRef.current?.destroy()
+    }
     window.location.reload()
   }
 
