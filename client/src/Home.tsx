@@ -15,9 +15,11 @@ const Home = () => {
     navigate(`/room/${id}`)
   }
   return (
-    <div>
-      Home
-      <button onClick={loginHandler}>Login</button>
+    <div className="container">
+      <h2>Video Call App</h2>
+      <button className="login-btn" onClick={loginHandler}>
+        Login
+      </button>
     </div>
   )
 }
