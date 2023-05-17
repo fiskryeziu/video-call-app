@@ -36,6 +36,7 @@ type SocketContextValue = {
   setIsLoggedIn: (value: string) => void
   callEnd?: boolean
   leaveCall?: () => void
+  declineCall?: () => void
 }
 
 // Create a new context for the socket
@@ -208,9 +209,11 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   }
 
   function declineCall() {
-    //call state → {}
-    //call answered false
-    // maybe reload page to get new socket.id
+    setCall({})
+    if (connectionRef.current) {
+      connectionRef.current.destroy()
+    }
+    window.location.reload()
   }
 
   window.addEventListener('popstate', () => {
@@ -238,6 +241,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         setIsLoggedIn,
         callEnd,
         leaveCall,
+        declineCall,
       }}
     >
       {children}

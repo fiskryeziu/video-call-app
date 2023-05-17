@@ -25,6 +25,7 @@ const Room = () => {
     callEnd,
     leaveCall,
     cameraOn,
+    declineCall,
   } = useContext(SocketContext)
 
   const copyToClipboard = (
@@ -111,6 +112,10 @@ const Room = () => {
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             <h1>{call.name ? call.name : 'User'} is calling:</h1>
             <button onClick={answerCall} className="call">
+              <FaPhone />
+            </button>
+
+            <button onClick={declineCall} className="end">
               <FaPhone />
             </button>
           </div>
