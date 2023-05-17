@@ -207,6 +207,12 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     window.location.reload()
   }
 
+  function declineCall() {
+    //call state → {}
+    //call answered false
+    // maybe reload page to get new socket.id
+  }
+
   window.addEventListener('popstate', () => {
     setIsLoggedIn('false')
     localStorage.setItem('loggedIn', 'false')

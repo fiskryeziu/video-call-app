@@ -55,48 +55,63 @@ const Room = () => {
           </div>
         )}
       </div>
+
       <div className="options">
-        <form>
-          {show ? (
-            <>
-              <button onClick={copyToClipboard} className="copy-btn">
-                <FaCopy />
+        {call && !call.isReceivingCall && !callAccepted && (
+          <form>
+            {show ? (
+              <>
+                <button onClick={copyToClipboard} className="copy-btn">
+                  <FaCopy />
+                </button>
+                <input
+                  type="text"
+                  placeholder="Enter name..."
+                  onChange={onChange}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter call Id"
+                  onChange={(e) => setCopyText(e.target.value)}
+                />
+                <button onClick={toggleForm}>
+                  <FaCaretLeft size={25} />
+                </button>
+              </>
+            ) : (
+              <button className="toggleForm" onClick={toggleForm}>
+                <FaCaretRight size={25} />
               </button>
-              <input
-                type="text"
-                placeholder="Enter name..."
-                onChange={onChange}
-              />
-              <input
-                type="text"
-                placeholder="Enter call Id"
-                onChange={(e) => setCopyText(e.target.value)}
-              />
-              <button onClick={toggleForm}>
-                <FaCaretLeft size={25} />
-              </button>
-            </>
-          ) : (
-            <button className="toggleForm" onClick={toggleForm}>
-              <FaCaretRight size={25} />
-            </button>
-          )}
-        </form>
+            )}
+          </form>
+        )}
         <button onClick={toggleCamera} className="toggleCamera">
           {cameraOn ? <BsCameraVideoFill /> : <BsCameraVideoOffFill />}
         </button>
-        <button onClick={leaveCall} className="end">
-          <FaPhoneSlash />
-        </button>
+        {callAccepted && (
+          <button onClick={leaveCall} className="end">
+            <FaPhoneSlash />
+          </button>
+        )}
 
-        <button onClick={() => callUser(copyText)} className="call">
-          <FaPhone />
-        </button>
+        {call && !call.isReceivingCall && !callAccepted && (
+          <button
+            onClick={() => {
+              if (copyText.length > 5) {
+                callUser(copyText)
+                setShow(false)
+              }
+            }}
+            className="call"
+          >
+            <FaPhone />
+          </button>
+        )}
         {call.isReceivingCall && !callAccepted && (
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-            <h1>{call.name} is calling:</h1>
-            <button color="primary" onClick={answerCall}>
-              Answer
+            <h1>{call.name ? call.name : 'User'} is calling:</h1>
+            <button onClick={answerCall} className="call">
+              <FaPhone />
             </button>
           </div>
         )}

@@ -209,6 +209,7 @@ form {
   height: 3em;
   border-radius: 50%;
   border: 0;
+  cursor: pointer;
 }
 
 .call {
